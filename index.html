@@ -1,1 +1,147 @@
-hello world
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>403 Forbidden</title>
+<style>
+  /* 全体のリセット＆背景レイアウト */
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    overflow: hidden; /* スクロール禁止 */
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* canvasは絶対に背景として配置 */
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none; /* マウスイベント無効 */
+    display: block;
+  }
+  /* メインコンテナ */
+  .container {
+    position: relative;
+    z-index: 1; /* canvasより前面 */
+    text-align: center;
+    padding: 2rem 3rem;
+    border: 2px solid #ff6f61;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 8px 15px rgba(255, 111, 97, 0.3);
+    width: 320px;
+    user-select: none;
+  }
+  /* 403の数字 */
+  h1 {
+    font-size: 6rem;
+    color: #ff6f61;
+    margin: 0 0 0.5rem 0;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-shadow: 0 2px 6px rgba(255, 111, 97, 0.4);
+    cursor: pointer;
+    display: inline-block;
+  }
+  /* メッセージ */
+  p.message {
+    font-size: 1.3rem;
+    color: #555;
+    margin: 0;
+    display: inline-block;
+    cursor: default;
+    transform-origin: center center;
+  }
+</style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="container">
+    <h1 id="error-code">403</h1>
+    <p class="message" id="message">アクセス権限がありません！</p>
+  </div>
+
+<script>
+  // 403の数字が跳ねるアニメーション
+  const errorCode = document.getElementById('error-code');
+  errorCode.addEventListener('mouseenter', () => {
+    errorCode.style.transition = 'transform 0.3s ease';
+    errorCode.style.transform = 'translateY(-20px) scale(1.1)';
+  });
+  errorCode.addEventListener('mouseleave', () => {
+    errorCode.style.transform = 'translateY(0) scale(1)';
+  });
+
+  // メッセージがゆらゆら揺れる
+  const message = document.getElementById('message');
+  let angle = 0;
+  function sway() {
+    angle += 0.05;
+    const swayX = Math.sin(angle) * 3;
+    message.style.transform = `translateX(${swayX}px)`;
+    requestAnimationFrame(sway);
+  }
+  sway();
+
+  // 背景パーティクル設定
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.radius = Math.random() * 2 + 1;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.3;
+      this.alpha = Math.random() * 0.5 + 0.3;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 111, 97, ${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  const particles = [];
+  const particleCount = 30;
+  for(let i=0; i<particleCount; i++) {
+    particles.push(new Particle());
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+</body>
+</html>
